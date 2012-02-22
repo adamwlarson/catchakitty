@@ -1,9 +1,22 @@
 {
-  "useAjaxForSystem": true,
-  "host": "ubuntu",
-  "socket.io": {
-    "host": "ubuntu",
-    "port": 8081
+  "useAjaxForSystem": true,  
+
+  "environments": {
+
+    "adamdev": {
+      "host": "ubuntu",
+      "socket.io": {
+        "host": "ubuntu",
+        "port": 8081
+      }
+    },
+
+    "jasondev": {
+      "host": "ubuntu",
+      "socket.io": {
+        "host": "ubuntu",
+        "port": 8081
+      }
+    }
   }
 }
-

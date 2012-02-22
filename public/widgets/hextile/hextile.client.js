@@ -27,6 +27,10 @@ feather.ns("catchakitty");
         me.domEvents.bind( me.get("#hexTileImage"), "click", function( ) {
           me.get("#hexTileImage").addClass("blocked"); 
         });
+
+        me.domEvents.bind( me.get("#hexTileImage"), "mousedown", function(event) {
+          event.preventDefault();
+        });
         
       },
       onSetTile: function( posX, posY ) {

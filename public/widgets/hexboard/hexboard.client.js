@@ -17,7 +17,6 @@ feather.ns("catchakitty");
         this.tileWidgets = 0;
       },
       _onCreateTile: function( callback ) {
-        
         feather.Widget.load( { // creats a widget
           path: "widgets/hextile/", // path to widget
           clientOptions: {

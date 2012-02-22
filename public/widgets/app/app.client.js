@@ -28,21 +28,12 @@ feather.ns("catchakitty");
                 return this.states.Game;
               }
             },
-          /*  MainMenu: {
-
-            },*/
             Game: {
               stateStartup: function( ) {
                 alert(" enter Game ");
                 me.gameKittyWidget.onMoveToTile( me.gameBoardWidget.grid[5][5] );
               }              
-            },
-          /*  EndGame: {
-              
-            },
-            Pause: {
-              
-            }*/
+            }
           }
         });
 
