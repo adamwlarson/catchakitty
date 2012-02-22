@@ -1,0 +1,32 @@
+.catchakitty_hextile .tile
+{
+  position:   absolute;
+  width:      192px;
+  height:     64px;
+  overflow:   hidden;
+  margin-left:  0px;
+  margin-top:   0px;
+  clip:         rect( 0px, 64px, 64px, 0px);
+}
+
+.catchakitty_hextile .over
+{
+  position: absolute;
+  width:      192px;
+  height:     64px;
+  overflow:   hidden;
+  margin-left:  -64px;
+  margin-top:   0px;
+  clip:         rect( 0px, 128px, 64px, 64px);
+}
+
+.catchakitty_hextile .blocked
+{
+  position: absolute;
+  width:      192px;
+  height:     64px;
+  overflow:   hidden;
+  margin-left:  -128px;
+  margin-top:   0px;
+  clip:         rect( 0px, 192px, 64px, 128px);
+}
