@@ -15,6 +15,8 @@ feather.ns("catchakitty");
         this.totalTiles = 0;
         this.grid = 0;
         this.tileWidgets = 0;
+        this.tileActions = 0;
+        this.ActionCallback = null;
       },
       _onCreateTile: function( callback ) {
         feather.Widget.load( { // creats a widget
@@ -66,6 +68,15 @@ feather.ns("catchakitty");
                                                     (x != this.width-1)? this.grid[x+1][y]:null,  // south east
                                                     (x != 0)? this.grid[x-1][y]:null);// south west
               }
+              
+              this.tileWidgets[index].on( "PlayerDone", function( ) {
+                me.fire('PlayerDone');
+              });
+
+              this.tileWidgets[index].on( "ActionDone", function( ) {
+                me._onAllTilesDone( );
+              });
+
               this.tileWidgets[index++].onSetTile( xOffset, yOffset );
               xOffset += width;
               yOffset += (x%2)? -halfHeight:halfHeight;
@@ -89,12 +100,37 @@ feather.ns("catchakitty");
         me.fire('LoadingDone');
         
       },
-      onCreateBoard: function( width, height, kitty ) {
+      onEnableAllTiles: function( bool ) {
+        for( var i = 0; i < this.totalTiles; i++ ) {
+          if( bool ) {
+            this.tileWidgets[i].fsm.fire('Enable');
+          }
+          else {
+            this.tileWidgets[i].fsm.fire('Disable');
+          }
+        }
+      },
+      onResetAllTiles: function( callback ) {
+        this.tileActions = this.totalTiles;
+        this.ActionCallback = callback;        
+
+        for( var i = 0; i < this.totalTiles; i++ ) {
+          this.tileWidgets[i].fsm.fire('Reset');
+        }
+      },
+      _onAllTilesDone: function( ) {
+        if( --this.tileActions <= 0 ) {
+          if( this.ActionCallback != null ) {
+            this.ActionCallback( );
+            this.ActionCallback = null;
+          }
+        }
+      },
+      onCreateBoard: function( width, height ) {
         this.width = width;
         this.height = height;
         this.totalTiles = width * height;
-        this.kitty = kitty;
-               
+
         // create the grid
         this.grid = [width];
         for( var i = 0; i < width; i++ ) {
@@ -109,6 +145,28 @@ feather.ns("catchakitty");
         }
 
       },
+     onMakeRandomBoard: function( callback ) {
+        var blocked = 30; // number of tiles
+        var x, y;
+
+        this.tileActions = blocked;
+        this.ActionCallback = callback;
+
+        while( blocked ) {
+          x = Math.floor( Math.random() * this.width );
+          y = Math.floor( Math.random() * this.height );
+          
+          if( x == y && x == 5 ) {
+            continue;
+          }
+
+          if( this.grid[x][y].onGetIsOpen() )
+          {
+            this.grid[x][y].fsm.fire('Blocked');
+            blocked--;
+          }
+        }
+      }
     }
   });
 })();

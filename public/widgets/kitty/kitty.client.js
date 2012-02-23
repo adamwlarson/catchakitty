@@ -8,14 +8,16 @@ feather.ns("catchakitty");
         
       },
       onReady: function() {
+        this.tile = null;
         
       },
-      onMoveToTile: function( tile ) {
+      onMoveToTile: function( tile, callback ) {
+        this.tile = tile;
         this.get("#kittyImage").animate( {
-          left: tile.get("#hexTileImage").position().left,
-          top: tile.get("#hexTileImage").position().top
-        }, "fast", 'linear', 0 );
-      },
+          left: tile.onGetPosX(),
+          top: tile.onGetPosY()
+        }, "fast", 'linear', callback );
+      }     
     }
   });
 })();

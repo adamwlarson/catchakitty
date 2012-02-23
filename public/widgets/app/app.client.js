@@ -4,11 +4,7 @@ feather.ns("catchakitty");
     name: "catchakitty.app",
     path: "widgets/app/",
     prototype: {
-      onInit: function( ) {
-
-        var me = this;
-
-        
+      onInit: function( ) {     
         
       },
       onReady: function( ) {
@@ -18,31 +14,102 @@ feather.ns("catchakitty");
           states: {
             initial: {
               stateStartup: function() {
-                alert(" enter loading ");
-
-                me.gameBoardWidget.onCreateBoard( 11, 11, me.gameKittyWidget );    
+                me.gameBoardWidget.onCreateBoard( 11, 11 );
               },
-              Exit: function( ) {
-                alert(" exit loading ");
-
-                return this.states.Game;
+              setup: function() {
+                return this.states.Setup;
               }
             },
-            Game: {
+            Setup: {
+              stateStartup: function() {
+                me.gameBoardWidget.onResetAllTiles( function( ) {
+                  me.fsm.fire('SetupBoard')
+                });                 
+              },
+              SetupBoard: function() {
+                me.gameBoardWidget.onMakeRandomBoard( function( ) {
+                  me.fsm.fire('MoveKitty')
+                });                 
+              },
+              MoveKitty: function() {
+                me.gameKittyWidget.onMoveToTile( me.gameBoardWidget.grid[5][5], function( ) {
+                  me.fsm.fire('Exit');
+                });
+              },
+              Exit: function( ) {
+                return this.states.GamePlayerTurn;
+              }
+            },
+            GamePlayerTurn: {
               stateStartup: function( ) {
-                alert(" enter Game ");
-                me.gameKittyWidget.onMoveToTile( me.gameBoardWidget.grid[5][5] );
-              }              
+                me.gameBoardWidget.onEnableAllTiles( true );
+              },
+              AiTurn: function( ) {
+                return this.states.GameAITurn;
+              }
+            },
+            GameAITurn: {
+              stateStartup: function( ) {
+                me.gameBoardWidget.onEnableAllTiles( false );
+                var result = me.onAiChoose( );
+                if( result ){ // do more with result here
+                  return this.states.Setup;
+                }
+
+              },
+              PlayerTurn: function( ) {
+                return this.states.GamePlayerTurn;
+              }
             }
           }
         });
 
         this.gameBoardWidget.on( "LoadingDone", function( ) {
-          alert(" LoadingDone ");
-          me.fsm.fire('Exit');
+          me.fsm.fire('setup');
         });
-       
+
+        this.gameBoardWidget.on( "PlayerDone", function( ) {
+          me.fsm.fire('AiTurn');
+        });     
         
+      },
+      onAiChoose: function( ) {
+        var me = this;
+        var tile = me.gameKittyWidget.tile;
+        var direction = [ tile.north, tile.south, tile.neast, tile.nwest, tile.seast, tile.swest ];
+
+        // check for freedom
+        for( var i = 0; i < 6; i++ ) {
+          if( direction[i] == null ) {
+            alert("you lose");
+            return -1;
+          }
+        }
+
+        // check for trapped
+        for( var i = 0; i < 6; i++ ) {
+          if( direction[i].onGetIsOpen() ) {
+            break;
+          }
+        }
+        if( i == 6 )
+        {
+          alert("you win");
+          return 1;
+        }
+
+        // pick a tile
+        var v = Math.floor( Math.random() * 6 );
+        while( direction[v] == null || !direction[v].onGetIsOpen() )
+        {
+          v = (v+1) % 6;
+        }
+
+        me.gameKittyWidget.onMoveToTile( direction[v], function( ) {
+          me.fsm.fire('PlayerTurn');
+        }); 
+        
+        return 0;      
       }
     }
   });
