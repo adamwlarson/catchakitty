@@ -9,6 +9,11 @@ feather.ns("catchakitty");
       },
       onReady: function() {
         this.tile = null;
+        var me = this;
+
+        me.domEvents.bind( me.get("#kittyImage"), "mousedown", function(event) {
+          event.preventDefault();
+        });
         
       },
       onMoveToTile: function( tile, callback ) {

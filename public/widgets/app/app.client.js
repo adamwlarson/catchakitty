@@ -1,4 +1,7 @@
 feather.ns("catchakitty");
+var dialog = null;
+var level = 1;
+var score = 0;
 (function() {
   catchakitty.app = feather.Widget.create({
     name: "catchakitty.app",
@@ -10,28 +13,45 @@ feather.ns("catchakitty");
       onReady: function( ) {
         var me = this;
 
+        dialog = me.get("#gameDialog").dialog( {
+          autoOpen: false,
+          title: 'Basic Dialog',
+          show: 'slide',
+          dialogClass: 'dialog',
+          hide: 'slide',
+          draggable: false,
+          resizable: false,
+          buttons: { "Ok": function( ) {
+              dialog.dialog("close");
+              me.fsm.fire('ReStart');
+            }
+          }
+        });
+        
         me.fsm = new feather.FiniteStateMachine( {
           states: {
             initial: {
-              stateStartup: function() {
+              stateStartup: function( ) {
                 me.gameBoardWidget.onCreateBoard( 11, 11 );
               },
-              setup: function() {
+              setup: function( ) {
                 return this.states.Setup;
               }
             },
             Setup: {
-              stateStartup: function() {
+              stateStartup: function( ) {
                 me.gameBoardWidget.onResetAllTiles( function( ) {
                   me.fsm.fire('SetupBoard')
                 });                 
               },
-              SetupBoard: function() {
-                me.gameBoardWidget.onMakeRandomBoard( function( ) {
+              SetupBoard: function( ) {
+                var tiles = 35 - level;
+                tiles = Math.max( tiles, 2);
+                me.gameBoardWidget.onMakeRandomBoard( tiles, function( ) {
                   me.fsm.fire('MoveKitty')
                 });                 
               },
-              MoveKitty: function() {
+              MoveKitty: function( ) {
                 me.gameKittyWidget.onMoveToTile( me.gameBoardWidget.grid[5][5], function( ) {
                   me.fsm.fire('Exit');
                 });
@@ -51,14 +71,21 @@ feather.ns("catchakitty");
             GameAITurn: {
               stateStartup: function( ) {
                 me.gameBoardWidget.onEnableAllTiles( false );
-                var result = me.onAiChoose( );
-                if( result ){ // do more with result here
-                  return this.states.Setup;
+                if( me.onAiChoose( ) ){ // returns if game is over
+                  return this.states.GameEnd;
                 }
 
               },
               PlayerTurn: function( ) {
                 return this.states.GamePlayerTurn;
+              }
+            },
+            GameEnd: {
+              stateStartup: function( ) {
+                me.gameBoardWidget.onEnableAllTiles( false );
+              },
+              ReStart: function( ) {
+                return this.states.Setup;
               }
             }
           }
@@ -73,6 +100,22 @@ feather.ns("catchakitty");
         });     
         
       },
+      onWin: function( ) {
+        dialog.dialog("option", "title", 'You Win');
+        dialog.dialog("open");
+        level++;
+        score += this.gameBoardWidget.onGetScore( )*10; // count enabled tiles
+        this.get( '#gameScore' ).html( "Score: " + score);
+        this.get( '#gameLevel' ).html( "Level: " + level);
+      },
+      onLose: function( ) {
+        dialog.dialog("option", "title", 'You Lose');
+        dialog.dialog("open");
+        level = 1;
+        score = 0;
+        this.get( '#gameScore' ).html( "Score: " + score);
+        this.get( '#gameLevel' ).html( "Level: " + level);
+      },
       onAiChoose: function( ) {
         var me = this;
         var tile = me.gameKittyWidget.tile;
@@ -81,8 +124,8 @@ feather.ns("catchakitty");
         // check for freedom
         for( var i = 0; i < 6; i++ ) {
           if( direction[i] == null ) {
-            alert("you lose");
-            return -1;
+            me.onLose( );
+            return 1;
           }
         }
 
@@ -92,16 +135,14 @@ feather.ns("catchakitty");
             break;
           }
         }
-        if( i == 6 )
-        {
-          alert("you win");
+        if( i == 6 ) {
+          me.onWin( );
           return 1;
         }
 
         // pick a tile
         var v = Math.floor( Math.random() * 6 );
-        while( direction[v] == null || !direction[v].onGetIsOpen() )
-        {
+        while( direction[v] == null || !direction[v].onGetIsOpen() ) {
           v = (v+1) % 6;
         }
 

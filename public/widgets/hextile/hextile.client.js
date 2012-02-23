@@ -76,6 +76,11 @@ feather.ns("catchakitty");
                 return this.states.initial;
               }
             },
+            TileUsed: {
+              stateStartup: function() {
+                
+              }              
+            },
             TileBlocked: {
               stateStartup: function() {
                 me.get("#hexTileImage").addClass("blocked");

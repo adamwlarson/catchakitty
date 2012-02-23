@@ -1,0 +1,30 @@
+.catchakitty_app .app
+{
+  position: relative;
+  left: 300px;
+  top: 100px;
+}
+
+.catchakitty_app .title {
+  position: relative;
+  color: blue;
+  font-size: 24px;
+}
+
+.catchakitty_app .level {
+  position: relative;
+  color: blue;
+  font-size: 12px;
+}
+
+.catchakitty_app .score {
+  position: relative;
+  color: blue;
+  font-size: 12px;
+}
+
+.catchakitty_app .dialog {
+  position: relative;
+  left: 0px;
+  top: 200px;
+}

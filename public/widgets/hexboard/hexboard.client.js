@@ -84,18 +84,6 @@ feather.ns("catchakitty");
           yOffset += halfHeight;
           xOffset = 0;
         }
-        
-        //this.grid[2][0].get("#hexTileImage").addClass( "blocked");
-        /*this.grid[1][2].get("#hexTileImage").addClass( "blocked");
-        this.grid[0][2].get("#hexTileImage").addClass( "blocked");
-        this.grid[2][2].north.north.get("#hexTileImage").addClass( "blocked");*/
-        /*this.grid[2][2].nwest.nwest.get("#hexTileImage").addClass( "blocked");
-        this.grid[2][2].neast.neast.get("#hexTileImage").addClass( "blocked");
-        this.grid[2][2].south.south.get("#hexTileImage").addClass( "blocked");
-        this.grid[2][2].north.north.get("#hexTileImage").addClass( "blocked");        
-        this.grid[2][2].swest.swest.get("#hexTileImage").addClass( "blocked");
-        this.grid[2][2].seast.seast.get("#hexTileImage").addClass( "blocked");*/
-        //alert( this.grid[2][0].north == null );
 
         me.fire('LoadingDone');
         
@@ -145,14 +133,14 @@ feather.ns("catchakitty");
         }
 
       },
-     onMakeRandomBoard: function( callback ) {
-        var blocked = 30; // number of tiles
+     onMakeRandomBoard: function( num, callback ) {
+        var blocked = num; // number of tiles
         var x, y;
 
         this.tileActions = blocked;
         this.ActionCallback = callback;
 
-        while( blocked ) {
+        while( blocked >= 0 ) {
           x = Math.floor( Math.random() * this.width );
           y = Math.floor( Math.random() * this.height );
           
@@ -166,6 +154,16 @@ feather.ns("catchakitty");
             blocked--;
           }
         }
+      },
+      onGetScore: function( ) {
+        var score = 0;
+        for( var i = 0; i < this.totalTiles; i++ ) {          
+          if( this.tileWidgets[i].onGetIsOpen() ) {
+            score++;
+          }
+        }
+
+        return score;
       }
     }
   });
