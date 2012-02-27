@@ -69,8 +69,8 @@ feather.ns("catchakitty");
                                                     (x != 0)? this.grid[x-1][y]:null);// south west
               }
               
-              this.tileWidgets[index].on( "PlayerDone", function( ) {
-                me.fire('PlayerDone');
+              this.tileWidgets[index].on( "PlayerDone", function( data ) {
+                me.fire('PlayerDone', data );
               });
 
               this.tileWidgets[index].on( "ActionDone", function( ) {
@@ -88,7 +88,10 @@ feather.ns("catchakitty");
         me.fire('LoadingDone');
         
       },
-      onEnableAllTiles: function( bool ) {
+      onEnableAllTiles: function( bool, callback ) {
+        this.tileActions = this.totalTiles;
+        this.ActionCallback = callback;
+
         for( var i = 0; i < this.totalTiles; i++ ) {
           if( bool ) {
             this.tileWidgets[i].fsm.fire('Enable');
@@ -155,7 +158,7 @@ feather.ns("catchakitty");
           }
         }
       },
-      onGetScore: function( ) {
+      onCountEnabledTiles: function( ) {
         var score = 0;
         for( var i = 0; i < this.totalTiles; i++ ) {          
           if( this.tileWidgets[i].onGetIsOpen() ) {
@@ -164,7 +167,61 @@ feather.ns("catchakitty");
         }
 
         return score;
+      },
+      _onAddNewTiles: function( newList, tile, dist ) {
+        var dirs = [ tile.north, tile.south, tile.neast, tile.nwest, tile.seast, tile.swest ];
+        var index = 0;
+        for( var i = 0; i < 6; i++ ) {
+          if( dirs[i] != null && dirs[i].onGetIsOpen() && dirs[i].visited == -1 ) {
+            newList[newList.length] = dirs[i];
+            dirs[i].visited = dist;
+          }
+        }
+      },
+      onCalculatePath: function( startTile ) {
+        var dist = 1, index = 0;
+        var pathList = [];
+        var newList = [];
+
+        pathList[index] = startTile;
+        startTile.visited = 0; // cheating!
+
+        // build path, todo put in function
+        // if newList is empty we are done
+        while( newList.length > 0 || index == 0 )
+        {
+          newList.splice( 0, newList.length );
+
+          
+          // add nearby nodes of pathList into newList
+          while( index < pathList.length ) {
+
+            startTile = pathList[index];
+            if( pathList[index].onCheckPath( null ) ) // end found
+            {
+              newList.splice( 0, newList.length );
+              break;
+            }
+            this._onAddNewTiles( newList, pathList[index], dist );
+            index++;
+          }
+          
+          dist++;
+          // add newlist to end of pathlist and continue
+          pathList = pathList.concat( newList );
+          
+        }
+        dist = startTile.visited;
+        
+        // find the next tile to move to
+        while( --dist > 0 ){
+          startTile = startTile.onFindNextPath( dist );
+          dist = startTile.visited;      
+        }        
+        return startTile;
       }
+
+
     }
   });
 })();

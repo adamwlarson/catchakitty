@@ -1,7 +1,5 @@
 feather.ns("catchakitty");
-var dialog = null;
-var level = 1;
-var score = 0;
+var appMoves = 6;
 (function() {
   catchakitty.app = feather.Widget.create({
     name: "catchakitty.app",
@@ -13,7 +11,11 @@ var score = 0;
       onReady: function( ) {
         var me = this;
 
-        dialog = me.get("#gameDialog").dialog( {
+        this.appScore = 0;
+        this.appLevel = 1;
+        this.moveList = [];
+        this.appTurns = 0;
+        this.appDialog = me.get("#gameDialog").dialog( {
           autoOpen: false,
           title: 'Basic Dialog',
           show: 'slide',
@@ -22,7 +24,7 @@ var score = 0;
           draggable: false,
           resizable: false,
           buttons: { "Ok": function( ) {
-              dialog.dialog("close");
+              me.appDialog.dialog("close");
               me.fsm.fire('ReStart');
             }
           }
@@ -45,8 +47,8 @@ var score = 0;
                 });                 
               },
               SetupBoard: function( ) {
-                var tiles = 35 - level;
-                tiles = Math.max( tiles, 2);
+                var tiles = 35 - me.appLevel;
+                tiles = Math.max( tiles, 10);
                 me.gameBoardWidget.onMakeRandomBoard( tiles, function( ) {
                   me.fsm.fire('MoveKitty')
                 });                 
@@ -70,11 +72,14 @@ var score = 0;
             },
             GameAITurn: {
               stateStartup: function( ) {
-                me.gameBoardWidget.onEnableAllTiles( false );
+                me.gameBoardWidget.onEnableAllTiles( false, function() {
+                  me.fsm.fire('AiMove');
+                });
+              },
+              AiMove: function( ) {
                 if( me.onAiChoose( ) ){ // returns if game is over
                   return this.states.GameEnd;
-                }
-
+                }  
               },
               PlayerTurn: function( ) {
                 return this.states.GamePlayerTurn;
@@ -95,26 +100,46 @@ var score = 0;
           me.fsm.fire('setup');
         });
 
-        this.gameBoardWidget.on( "PlayerDone", function( ) {
+        this.gameBoardWidget.on( "PlayerDone", function( data ) {
+          me.onPlayersTurn( data );
           me.fsm.fire('AiTurn');
         });     
         
       },
+      onPlayersTurn: function( data ) {
+        if( this.moveList.length >= appMoves ) {
+          this.moveList[0].fsm.fire('Clear');
+          this.moveList.splice( 0, 1); // remove first tile
+        }
+        
+        this.appTurns++;
+        
+        this.moveList[this.moveList.length] = data; // save the tile
+        
+        for( var i = 0; i < this.moveList.length; i++ ) {
+          this.moveList[i].onFade( appMoves );
+        }
+      },
       onWin: function( ) {
-        dialog.dialog("option", "title", 'You Win');
-        dialog.dialog("open");
-        level++;
-        score += this.gameBoardWidget.onGetScore( )*10; // count enabled tiles
-        this.get( '#gameScore' ).html( "Score: " + score);
-        this.get( '#gameLevel' ).html( "Level: " + level);
+        this.appDialog.dialog("option", "title", 'You Win');
+        this.appDialog.dialog("open");
+        this.appLevel++;
+        //this.appScore += this.gameBoardWidget.onCountEnabledTiles( )*10; // count enabled tiles
+        this.appScore += Math.max( (1000 - (this.appTurns*10)), 100 );
+        this.get( '#gameScore' ).html( "Score: " + this.appScore);
+        this.get( '#gameLevel' ).html( "Level: " + this.appLevel);
+        this.moveList.splice( 0, this.moveList.length );
+        this.appTurns = 0;
       },
       onLose: function( ) {
-        dialog.dialog("option", "title", 'You Lose');
-        dialog.dialog("open");
-        level = 1;
-        score = 0;
-        this.get( '#gameScore' ).html( "Score: " + score);
-        this.get( '#gameLevel' ).html( "Level: " + level);
+        this.appDialog.dialog("option", "title", 'You Lose');
+        this.appDialog.dialog("open");
+        this.appLevel = 1;
+        this.appScore = 0;
+        this.get( '#gameScore' ).html( "Score: " + this.appScore);
+        this.get( '#gameLevel' ).html( "Level: " + this.appLevel);
+        this.moveList.splice( 0, this.moveList.length );
+        this.appTurns = 0;
       },
       onAiChoose: function( ) {
         var me = this;
@@ -140,13 +165,15 @@ var score = 0;
           return 1;
         }
 
+        tile = me.gameBoardWidget.onCalculatePath( me.gameKittyWidget.onGetCurrentTile() );
+
         // pick a tile
-        var v = Math.floor( Math.random() * 6 );
+        /*var v = Math.floor( Math.random() * 6 );
         while( direction[v] == null || !direction[v].onGetIsOpen() ) {
           v = (v+1) % 6;
-        }
+        }*/
 
-        me.gameKittyWidget.onMoveToTile( direction[v], function( ) {
+        me.gameKittyWidget.onMoveToTile( tile, function( ) {
           me.fsm.fire('PlayerTurn');
         }); 
         

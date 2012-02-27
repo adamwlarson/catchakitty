@@ -22,7 +22,10 @@ feather.ns("catchakitty");
           left: tile.onGetPosX(),
           top: tile.onGetPosY()
         }, "fast", 'linear', callback );
-      }     
+      },
+      onGetCurrentTile: function( ) {
+        return this.tile;
+      }
     }
   });
 })();
