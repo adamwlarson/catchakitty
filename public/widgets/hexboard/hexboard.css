@@ -1,6 +1,6 @@
 .catchakitty_hexboard .gameBoard
 {
-  position: absolute;
+  position: relative;
   left: 0px;
   top:  0px;
 }

@@ -1,7 +1,7 @@
 .catchakitty_hextile .tile
 {
   position:   absolute;
-  width:      192px;
+  width:      512px;
   height:     64px;
   overflow:   hidden;
   margin-left:  0px;
@@ -12,7 +12,7 @@
 .catchakitty_hextile .over
 {
   position: absolute;
-  width:      192px;
+  width:      512px;
   height:     64px;
   overflow:   hidden;
   margin-left:  -64px;
@@ -23,10 +23,65 @@
 .catchakitty_hextile .blocked
 {
   position: absolute;
-  width:      192px;
+  width:      512px;
   height:     64px;
   overflow:   hidden;
   margin-left:  -128px;
   margin-top:   0px;
   clip:         rect( 0px, 192px, 64px, 128px);
+}
+
+.catchakitty_hextile .used
+{
+  position: absolute;
+  width:      512px;
+  height:     64px;
+  overflow:   hidden;
+  margin-left:  -192px;
+  margin-top:   0px;
+  clip:         rect( 0px, 256px, 64px, 192px);
+}
+
+.catchakitty_hextile .used1
+{
+  position: absolute;
+  width:      512px;
+  height:     64px;
+  overflow:   hidden;
+  margin-left:  -256px;
+  margin-top:   0px;
+  clip:         rect( 0px, 320px, 64px, 256px);
+}
+
+.catchakitty_hextile .used2
+{
+  position: absolute;
+  width:      512px;
+  height:     64px;
+  overflow:   hidden;
+  margin-left:  -320px;
+  margin-top:   0px;
+  clip:         rect( 0px, 384px, 64px, 320px);
+}
+
+.catchakitty_hextile .used3
+{
+  position: absolute;
+  width:      512px;
+  height:     64px;
+  overflow:   hidden;
+  margin-left:  -384px;
+  margin-top:   0px;
+  clip:         rect( 0px, 448px, 64px, 384px);
+}
+
+.catchakitty_hextile .used4
+{
+  position: absolute;
+  width:      512px;
+  height:     64px;
+  overflow:   hidden;
+  margin-left:  -448px;
+  margin-top:   0px;
+  clip:         rect( 0px, 512px, 64px, 448px);
 }

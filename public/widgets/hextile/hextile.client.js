@@ -9,6 +9,8 @@ feather.ns("catchakitty");
       },
       onReady: function( ) {
         var me = this;
+        this.fade = 0;
+        this.visited = -1;
         this.open = true;
         this.north = null; // might want directions in array form
         this.south = null;
@@ -21,9 +23,11 @@ feather.ns("catchakitty");
           states: {
             initial: {
               stateStartup: function() {
-                me.get("#hexTileImage").removeClass("over");
-                me.get("#hexTileImage").removeClass("blocked");
+                me.get("#hexTileImage").removeClass();
+                me.get("#hexTileImage").addClass("tile");
                 me.fire('ActionDone');
+                me.fade = 0;
+                me.visited = -1;
               },
               Enable: function() {
                 return this.states.TileEnable;
@@ -38,7 +42,7 @@ feather.ns("catchakitty");
             },
             TileEnable: {
               stateStartup: function() {
-                 
+                 me.fire('ActionDone');
               },
               mouseEnter: function() {
                 me.get("#hexTileImage").addClass("over");
@@ -47,7 +51,7 @@ feather.ns("catchakitty");
                 me.get("#hexTileImage").removeClass("over");
               },
               mouseClick: function() {
-                return this.states.TileBlocked;
+                return this.states.TileUsed;
               },
               Disable: function() {
                 return this.states.TileDisable;
@@ -61,6 +65,8 @@ feather.ns("catchakitty");
             },
             TileDisable: {
               stateStartup: function() {
+                me.visited = -1;
+                me.fire('ActionDone');
                  
               },
               mouseEnter: function() {
@@ -70,22 +76,57 @@ feather.ns("catchakitty");
                 me.get("#hexTileImage").removeClass("over");
               },
               Enable: function() {
+                me.visited = -1;
                 return this.states.TileEnable;
               },
               Reset: function() {
                 return this.states.initial;
+              },
+              Disable: function() {
+                me.fire('ActionDone');
               }
+            },
+            TileUsed: {
+              stateStartup: function() {
+                me.get("#hexTileImage").addClass("used");
+                me.open = false;
+                me.fire('PlayerDone', me);
+              },
+              Clear: function() {
+                me.open = true;
+                me.get("#hexTileImage").removeClass();
+                me.get("#hexTileImage").addClass("tile");
+                me.fade = 0;
+                return this.states.TileEnable;
+              },
+              Reset: function() {
+                me.open = true;
+                return this.states.initial;
+              },
+              Enable: function() {
+                me.visited = -1;
+                me.fire('ActionDone');
+              },
+              Disable: function() {
+                me.fire('ActionDone');
+              }             
             },
             TileBlocked: {
               stateStartup: function() {
                 me.get("#hexTileImage").addClass("blocked");
                 me.open = false;
-                me.fire('PlayerDone');
                 me.fire('ActionDone');
               },
               Reset: function() {
                 me.open = true;
                 return this.states.initial;
+              },
+              Enable: function() {
+                me.visited = -1;
+                me.fire('ActionDone');
+              },
+              Disable: function() {
+                me.fire('ActionDone');
               }
             }
           }
@@ -136,6 +177,61 @@ feather.ns("catchakitty");
       },
       onGetIsOpen: function( ) {
         return this.open;
+      },
+      onCheckPath: function( tile ) {
+        return  ( this.north == tile ) ||
+                ( this.south == tile ) ||
+                ( this.neast == tile ) ||
+                ( this.seast == tile ) ||
+                ( this.nwest == tile ) ||
+                ( this.swest == tile );
+      },
+      onFindNextPath: function( distance ) {
+
+      /*  console.log( " findnext dist: " + distance );
+
+        console.log( " north dist: " + ((this.north==null)? -1: this.north.visited) );
+        console.log( " south dist: " + ((this.south==null)? -1: this.south.visited) );
+        console.log( " neast dist: " + ((this.neast==null)? -1: this.neast.visited) );
+        console.log( " seast dist: " + ((this.seast==null)? -1: this.seast.visited) );
+        console.log( " nwest dist: " + ((this.nwest==null)? -1: this.nwest.visited) );
+        console.log( " swest dist: " + ((this.swest==null)? -1: this.swest.visited) );*/
+
+        if( this.north != null && this.north.visited == distance ) {
+          return this.north;
+        }
+        if( this.south != null && this.south.visited == distance ) {
+          return this.south;
+        }
+        if( this.neast != null && this.neast.visited == distance ) {
+          return this.neast;
+        }
+        if( this.seast != null && this.seast.visited == distance ) {
+          return this.seast;
+        }
+        if( this.nwest != null && this.nwest.visited == distance ) {
+          return this.nwest;
+        }
+        if( this.swest != null && this.swest.visited == distance ) {
+          return this.swest;
+        }
+
+        alert("could not find distance");
+      },
+      onFade: function( levels ) {
+        this.fade++;
+        if( this.fade >= levels ) {
+          this.get("#hexTileImage").addClass("used4");
+        }
+        else if( this.fade >= levels-1) {
+          this.get("#hexTileImage").addClass("used3");  
+        }
+        else if( this.fade >= levels-2) {
+          this.get("#hexTileImage").addClass("used2");  
+        }
+        else if( this.fade >= levels-3) {
+          this.get("#hexTileImage").addClass("used1");  
+        }
       }
     }
   });
